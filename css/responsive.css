@@ -1,0 +1,14 @@
+/* responsive */
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}}
+@media(max-width:860px){.app{grid-template-columns:1fr}aside{position:fixed;inset:0 auto 0 0;width:232px;z-index:15;transform:translateX(-100%);transition:.2s}aside.open{transform:none}
+main{padding:18px 14px}header{padding:12px 14px}.uname{display:none}.fg{grid-template-columns:1fr}.login{grid-template-columns:1fr}.hero{display:none}}
+@media(min-width:861px){#mb{display:none}}
+
+/* RTL (Arabic) */
+[dir=rtl] body{font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+[dir=rtl] aside{border-right:0;border-left:1px solid var(--line)}
+[dir=rtl] .nav.on{box-shadow:inset -2px 0 var(--blue)}
+[dir=rtl] th{text-align:right}
+[dir=rtl] .user{margin-left:0;margin-right:auto}
+[dir=rtl] .dot{right:auto;left:-5px}
+@media(max-width:860px){[dir=rtl] aside{inset:0 0 0 auto;transform:translateX(100%)}[dir=rtl] aside.open{transform:none}}
