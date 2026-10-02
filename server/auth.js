@@ -1,0 +1,22 @@
+const router = require('express').Router();
+const bcrypt = require('bcryptjs'), jwt = require('jsonwebtoken'), rateLimit = require('express-rate-limit');
+const db = require('./database');
+const SECRET = process.env.JWT_SECRET;
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false });
+const audit = (uid, action, result, req) => db.query('insert into audit_logs(user_id,action,resource,result,ip,user_agent) values($1,$2,$3,$4,$5,$6)', [uid, action, 'auth', result, req.ip, req.get('user-agent')]).catch(() => {});
+router.post('/login', limiter, async (req, res) => {
+  const { email, password } = req.body || {};
+  if (typeof email !== 'string' || typeof password !== 'string') return res.status(400).json({ error: 'Invalid request' });
+  const { rows: [u] } = await db.query('select id,password_hash,role,full_name,company_id,active from users where email=$1', [email.toLowerCase().trim()]);
+  const ok = !!u && u.active && await bcrypt.compare(password, u.password_hash);
+  await audit(u && u.id, ok ? 'LOGIN' : 'LOGIN_FAILED', ok ? 'SUCCESS' : 'DENIED', req);
+  if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+  await db.query('update users set last_login_at=now() where id=$1', [u.id]);
+  const token = jwt.sign({ sub: u.id, role: u.role, company: u.company_id }, SECRET, { expiresIn: '8h' });
+  res.cookie('omms_token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 8 * 3600e3 });
+  res.json({ name: u.full_name, role: u.role });
+});
+router.post('/logout', (req, res) => { res.clearCookie('omms_token'); res.json({ ok: true }); });
+const requireAuth = (req, res, next) => { try { req.user = jwt.verify(req.cookies.omms_token, SECRET); next(); } catch { res.status(401).json({ error: 'Unauthenticated' }); } };
+const requireRole = (...roles) => (req, res, next) => roles.includes(req.user.role) ? next() : res.status(403).json({ error: 'Forbidden' });
+module.exports = { router, requireAuth, requireRole };

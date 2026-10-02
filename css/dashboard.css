@@ -1,0 +1,5 @@
+/* dashboard widgets */
+.kpi{display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}.kpi .ico{width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
+.kpi b{font-size:30px;line-height:1}.up{color:var(--teal)}.dn{color:var(--red)}
+.bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden;flex:1}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--teal))}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.cal span{padding:9px 0;border-radius:8px}.cal .t{background:var(--teal);color:#04141a;font-weight:700}.cal .e{box-shadow:inset 0 -3px var(--blue)}
